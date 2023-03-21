@@ -10,20 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
       credentials: true,
-      origin: [
-          'http://localhost:8081',
-          'http://localhost:8080',
-          'http://127.0.0.1:3000',
-          'http://localhost:3000',
-          'http://wellavi-backend.herokuapp.com',
-          'http://accounts.google.com',
-          'http://accounts.google.com/o/oauth2/v2/auth',
-          'http://wellavi-web1.herokuapp.com',
-          'https://wellavi-web1.herokuapp.com',
-          'https://accounts.google.com/o/oauth2/v2/auth',
-          'https://wellavi-backend.herokuapp.com',
-          'https://accounts.google.com',
-      ],
+      origin: '*',
     },
   });
 

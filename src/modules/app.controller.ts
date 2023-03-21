@@ -1,4 +1,4 @@
-import {Controller, Get, Param, Req, UseGuards,} from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards, } from '@nestjs/common';
 import {
   ApiBadRequestResponse, ApiBearerAuth,
   ApiCreatedResponse,
@@ -6,27 +6,24 @@ import {
   ApiTags,
   ApiUnauthorizedResponse
 } from '@nestjs/swagger';
-import {FollowRequestService} from '@/modules/follow-request/follow-request.service';
-import {BAD_REQUEST, DATA_FOUND, DATA_NOT_FOUND, INTERNAL_SERVER_ERROR} from '@/constants/constants';
-import {JwtAuthGuard} from '@auth/guards/jwt-auth.guard';
-import {SessionsService} from '@/modules/sessions/sessions.service';
-import {ViewsService} from '@/modules/views/views.service';
-import {CountryData, languagesData} from '@helpers/general.helper';
+import { BAD_REQUEST, DATA_FOUND, DATA_NOT_FOUND, INTERNAL_SERVER_ERROR } from '@/constants/constants';
+import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { CountryData, languagesData } from '@helpers/general.helper';
 
 @ApiTags('Dashboard')
 @Controller('dashboard')
 export class AppController {
 
   constructor(private readonly followRequestService: FollowRequestService,
-              private readonly sessionsService: SessionsService,
-              private readonly viewsService: ViewsService) {
+    private readonly sessionsService: SessionsService,
+    private readonly viewsService: ViewsService) {
   }
 
   @ApiCreatedResponse({
     schema: {
       type: 'object',
       example:
-          {"status": 200, "message": 'string', "data": []},
+        { "status": 200, "message": 'string', "data": [] },
 
     },
     description: '200, return followings data',
@@ -55,7 +52,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": BAD_REQUEST, "data": []},
+        { "status": 400, "message": BAD_REQUEST, "data": [] },
 
     },
     description: '400, return bad request error',
@@ -101,7 +98,7 @@ export class AppController {
 
     //fetch monthly views count
     const viewsCount = await this.viewsService.fetchViewsCount(req.user.email);
-      res.data[3] = viewsCount;
+    res.data[3] = viewsCount;
 
     return res;
   }
@@ -110,7 +107,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 200, "message": 'string', "data": []},
+        { "status": 200, "message": 'string', "data": [] },
 
     },
     description: '200, return dashboard number of count for graph',
@@ -139,7 +136,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": BAD_REQUEST, "data": []},
+        { "status": 400, "message": BAD_REQUEST, "data": [] },
 
     },
     description: '400, return bad request error',
@@ -148,8 +145,8 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('graph-data-count/:date_from/:date_to')
   async graphDataCount(@Req() req: any,
-                         @Param('date_from') dateFrom: string,
-                         @Param('date_to') dateTo: string) {
+    @Param('date_from') dateFrom: string,
+    @Param('date_to') dateTo: string) {
     const res = {
       status: 200,
       message: DATA_FOUND,
@@ -183,8 +180,7 @@ export class AppController {
 
     //fetch sessions count
     const sessionCount = await this.sessionsService.fetchSessionsCountWithDateFilter(req.user.email, dateFrom, dateTo);
-    if (sessionCount.length > 0)
-    {
+    if (sessionCount.length > 0) {
       res.status = 200;
       res.message = DATA_FOUND;
       res.data[0].totalCount = sessionCount[0].total_sessions;
@@ -192,8 +188,7 @@ export class AppController {
 
     //fetch hours count
     const hoursCount = await this.sessionsService.fetchHoursCountWithDateFilter(req.user.email, dateFrom, dateTo);
-    if (hoursCount.length > 0)
-    {
+    if (hoursCount.length > 0) {
       const total_hours = hoursCount[0].total_minutes / 60
       res.status = 200;
       res.message = DATA_FOUND;
@@ -202,8 +197,7 @@ export class AppController {
 
     //fetch monthly followers count
     const FollowersCount = await this.followRequestService.fetchFollowersWithDateFilter(req.user.email, dateFrom, dateTo);
-    if (FollowersCount.length > 0)
-    {
+    if (FollowersCount.length > 0) {
       res.status = 200;
       res.message = DATA_FOUND;
       res.data[3].totalCount = FollowersCount[0].total_followers;
@@ -211,8 +205,7 @@ export class AppController {
 
     //fetch views count
     const viewsCount = await this.viewsService.fetchViewsCountWithDateFilter(req.user.email, dateFrom, dateTo);
-    if (viewsCount.length > 0)
-    {
+    if (viewsCount.length > 0) {
       res.status = 200;
       res.message = DATA_FOUND;
       res.data[4].totalCount = viewsCount[0].total_views;
@@ -225,7 +218,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 200, "message": 'string', "data": []},
+        { "status": 200, "message": 'string', "data": [] },
 
     },
     description: '200, return dashboard graph sessions count date base',
@@ -254,7 +247,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": BAD_REQUEST, "data": []},
+        { "status": 400, "message": BAD_REQUEST, "data": [] },
 
     },
     description: '400, return bad request error',
@@ -263,8 +256,8 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('session-result/:date_from/:date_to')
   async graphSessionResult(@Req() req: any,
-                       @Param('date_from') dateFrom: string,
-                       @Param('date_to') dateTo: string) {
+    @Param('date_from') dateFrom: string,
+    @Param('date_to') dateTo: string) {
     const res = {
       status: 200,
       message: DATA_FOUND,
@@ -273,8 +266,7 @@ export class AppController {
 
     //fetch sessions count
     const sessionResult = await this.sessionsService.fetchSessionsResultWithDateFilter(req.user.email, dateFrom, dateTo);
-    if (sessionResult.length > 0)
-    {
+    if (sessionResult.length > 0) {
       res.status = 200;
       res.message = DATA_FOUND;
       res.data = sessionResult;
@@ -287,7 +279,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 200, "message": 'string', "data": []},
+        { "status": 200, "message": 'string', "data": [] },
 
     },
     description: '200, return dashboard graph hours count date base',
@@ -316,7 +308,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": BAD_REQUEST, "data": []},
+        { "status": 400, "message": BAD_REQUEST, "data": [] },
 
     },
     description: '400, return bad request error',
@@ -325,8 +317,8 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('hours-result/:date_from/:date_to')
   async graphHoursResult(@Req() req: any,
-                           @Param('date_from') dateFrom: string,
-                           @Param('date_to') dateTo: string) {
+    @Param('date_from') dateFrom: string,
+    @Param('date_to') dateTo: string) {
     const res = {
       status: 200,
       message: DATA_FOUND,
@@ -335,8 +327,7 @@ export class AppController {
 
     //fetch sessions count
     const hoursResult = await this.sessionsService.fetchHoursResultWithDateFilter(req.user.email, dateFrom, dateTo);
-    if (hoursResult.length > 0)
-    {
+    if (hoursResult.length > 0) {
       res.status = 200;
       res.message = DATA_FOUND;
       res.data = hoursResult;
@@ -349,7 +340,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 200, "message": 'string', "data": []},
+        { "status": 200, "message": 'string', "data": [] },
 
     },
     description: '200, return dashboard graph followers count date base',
@@ -378,7 +369,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": BAD_REQUEST, "data": []},
+        { "status": 400, "message": BAD_REQUEST, "data": [] },
 
     },
     description: '400, return bad request error',
@@ -387,8 +378,8 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('followers-result/:date_from/:date_to')
   async graphFollowersResult(@Req() req: any,
-                           @Param('date_from') dateFrom: string,
-                           @Param('date_to') dateTo: string) {
+    @Param('date_from') dateFrom: string,
+    @Param('date_to') dateTo: string) {
     const res = {
       status: 200,
       message: DATA_FOUND,
@@ -397,8 +388,7 @@ export class AppController {
 
     //fetch sessions count
     const followersResult = await this.followRequestService.fetchFollowersResultWithDateFilter(req.user.email, dateFrom, dateTo);
-    if (followersResult.length > 0)
-    {
+    if (followersResult.length > 0) {
       res.status = 200;
       res.message = DATA_FOUND;
       res.data = followersResult;
@@ -411,7 +401,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 200, "message": 'string', "data": []},
+        { "status": 200, "message": 'string', "data": [] },
 
     },
     description: '200, return dashboard graph views count date base',
@@ -440,7 +430,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": BAD_REQUEST, "data": []},
+        { "status": 400, "message": BAD_REQUEST, "data": [] },
 
     },
     description: '400, return bad request error',
@@ -449,8 +439,8 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('views-result/:date_from/:date_to')
   async graphViewsResult(@Req() req: any,
-                           @Param('date_from') dateFrom: string,
-                           @Param('date_to') dateTo: string) {
+    @Param('date_from') dateFrom: string,
+    @Param('date_to') dateTo: string) {
     const res = {
       status: 200,
       message: DATA_FOUND,
@@ -460,8 +450,7 @@ export class AppController {
     //fetch views result
     const viewsCount = await this.viewsService.fetchViewsResultWithDateFilter(req.user.email, dateFrom, dateTo);
 
-    if (viewsCount.length > 0)
-    {
+    if (viewsCount.length > 0) {
       res.status = 200;
       res.message = DATA_FOUND;
       res.data = viewsCount;
@@ -474,7 +463,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {status: 200, message: 'string', data: []},
+        { status: 200, message: 'string', data: [] },
 
     },
     description: '200, return languages',
@@ -503,7 +492,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": BAD_REQUEST, "data": []},
+        { "status": 400, "message": BAD_REQUEST, "data": [] },
 
     },
     description: '400, return bad request error',
@@ -523,7 +512,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {status: 200, message: 'string', data: []},
+        { status: 200, message: 'string', data: [] },
 
     },
     description: '200, return countries array',
@@ -552,7 +541,7 @@ export class AppController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": BAD_REQUEST, "data": []},
+        { "status": 400, "message": BAD_REQUEST, "data": [] },
 
     },
     description: '400, return bad request error',
