@@ -1,0 +1,8 @@
+export const CREATE_Session_NYLAS = 'https://api.nylas.com/events?notify_participants=true'
+export const UPDATE_Session_NYLAS = 'https://api.nylas.com/events/'
+export const AVAILABILITIES = 'https://api.nylas.com/calendars/availability'
+export const ALL_SESSIONS_NYLAS = 'https://api.nylas.com/events'
+export const ONE_ON_ONE_SESSION = 'One on One Session'
+export const GROUP_SESSION = 'Group Session'
+export const PRE_RECORDED_SESSION = 'Pre-recorded Session'
+export const WEBINAR_SESSION = 'Webinar Session'
