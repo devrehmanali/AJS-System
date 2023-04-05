@@ -11,17 +11,13 @@ import AuthRepository from '@auth/auth.repository';
 import { GoogleStrategy } from '@auth/strategies/google.strategy';
 import { LinkedinStrategy } from '@auth/strategies/linkedin.strategy';
 import { FacebookStrategy } from '@auth/strategies/facebook.strategy';
-import {ReferralModule} from "@/modules/referral/referral.module";
-import {FollowRequestModule} from "@/modules/follow-request/follow-request.module";
-import {StripeModule} from '@/modules/stripe/stripe.module';
-import {RabbitMqModule} from '@/modules/rabbit-mq/rabbit-mq.module';
+import { StripeModule } from '@/modules/stripe/stripe.module';
+import { RabbitMqModule } from '@/modules/rabbit-mq/rabbit-mq.module';
 
 @Module({
   imports: [
     PassportModule,
     UsersModule,
-    ReferralModule,
-    FollowRequestModule,
     StripeModule,
     RabbitMqModule,
     JwtModule.registerAsync({
@@ -51,4 +47,4 @@ import {RabbitMqModule} from '@/modules/rabbit-mq/rabbit-mq.module';
   controllers: [AuthController],
   exports: [AuthService],
 })
-export default class AuthModule {}
+export default class AuthModule { }

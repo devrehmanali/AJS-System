@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Post, Req, UseGuards} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -18,15 +18,15 @@ import {
     INTERNAL_SERVER_ERROR, PAYMENT_NOT_SUCCESSFULLY, PAYMENT_SUCCESSFULLY, PAYMENT_UPDATED_DEFAULT, SUBSCRIBED,
     SUCCESSFULLY_SAVED
 } from "@/constants/constants";
-import {StripeService} from "@/modules/stripe/stripe.service";
-import {AddCardDto} from "@/modules/stripe/dto/add-card.dto";
-import {JwtAuthGuard} from "@auth/guards/jwt-auth.guard";
-import {UpdatePaymentMethodDto} from "@/modules/stripe/dto/update-payment-method.dto";
-import {DeleteCardDto} from "@/modules/stripe/dto/delete-card.dto";
-import {CheckoutDto} from "@/modules/stripe/dto/checkout.dto";
-import {CreateSubscriptionDto} from '@/modules/stripe/dto/create-subscription.dto';
-import {UpdatePaymentMethodDefaultDto} from '@/modules/stripe/dto/update-payment-method-default.dto';
-import {FeedbackDto} from '@/modules/stripe/dto/feedback.dto';
+import { StripeService } from "@/modules/stripe/stripe.service";
+import { AddCardDto } from "@/modules/stripe/dto/add-card.dto";
+import { JwtAuthGuard } from "@auth/guards/jwt-auth.guard";
+import { UpdatePaymentMethodDto } from "@/modules/stripe/dto/update-payment-method.dto";
+import { DeleteCardDto } from "@/modules/stripe/dto/delete-card.dto";
+import { CheckoutDto } from "@/modules/stripe/dto/checkout.dto";
+import { CreateSubscriptionDto } from '@/modules/stripe/dto/create-subscription.dto';
+import { UpdatePaymentMethodDefaultDto } from '@/modules/stripe/dto/update-payment-method-default.dto';
+import { FeedbackDto } from '@/modules/stripe/dto/feedback.dto';
 
 @ApiTags('Stripe Integration')
 @Controller('stripe')
@@ -36,10 +36,10 @@ export class StripeController {
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    @ApiBody({type: AddCardDto})
+    @ApiBody({ type: AddCardDto })
     @Post('add-card-details')
     async createCustomer(@Req() req: RequestWithUserInterface,
-                         @Body() data: AddCardDto) {
+        @Body() data: AddCardDto) {
         let res = {
             status: 500,
             message: INTERNAL_SERVER_ERROR,
@@ -92,7 +92,7 @@ export class StripeController {
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    @ApiBody({type: DeleteCardDto})
+    @ApiBody({ type: DeleteCardDto })
     @Post('delete-card')
     async deletePaymentMethod(@Body() data: DeleteCardDto) {
         let res = {
@@ -148,7 +148,7 @@ export class StripeController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Delete('archive-product/:id')
-    async archiveProduct( @Param('id') id: string,) {
+    async archiveProduct(@Param('id') id: string,) {
         let res = {
             status: 400,
             message: DATA_NOT_FOUND,
@@ -167,7 +167,7 @@ export class StripeController {
         schema: {
             type: 'array',
             example:
-                {status: 200, message: DATA_FOUND, data: []},
+                { status: 200, message: DATA_FOUND, data: [] },
         },
         description: '200, Retrieve All connect accounts',
     })
@@ -194,7 +194,7 @@ export class StripeController {
         schema: {
             type: 'object',
             example:
-                {"status": 400, "message": "string"},
+                { "status": 400, "message": "string" },
 
         },
         description: '400, return bad request error',
@@ -221,7 +221,7 @@ export class StripeController {
     @UseGuards(JwtAuthGuard)
     @Post('create-subscription')
     async createSubscription(@Req() req: RequestWithUserInterface,
-                             @Body() data : CreateSubscriptionDto) {
+        @Body() data: CreateSubscriptionDto) {
         let res = {
             status: 400,
             message: DATA_NOT_FOUND,
@@ -240,7 +240,7 @@ export class StripeController {
     @UseGuards(JwtAuthGuard)
     @Post('checkout')
     async checkout(@Req() req: RequestWithUserInterface,
-                   @Body() data: CheckoutDto) {
+        @Body() data: CheckoutDto) {
         let res = {
             status: 500,
             message: PAYMENT_NOT_SUCCESSFULLY,
@@ -278,7 +278,7 @@ export class StripeController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Post('update-card-as-default')
-    async updatePaymentMethodAsDefault(@Body() data : UpdatePaymentMethodDefaultDto) {
+    async updatePaymentMethodAsDefault(@Body() data: UpdatePaymentMethodDefaultDto) {
         let res = {
             status: 200,
             message: DATA_NOT_FOUND,
@@ -295,8 +295,8 @@ export class StripeController {
     @UseGuards(JwtAuthGuard)
     @Post('feedBack/:session_id')
     async feedBack(@Req() req: RequestWithUserInterface,
-                   @Body() data: FeedbackDto,
-                   @Param('session_id') sessionId: string,) {
+        @Body() data: FeedbackDto,
+        @Param('session_id') sessionId: string,) {
         let res = {
             status: 500,
             message: PAYMENT_NOT_SUCCESSFULLY,
@@ -354,10 +354,10 @@ export class StripeController {
         //paid out balance code
         const payoutsBalance = await this.stripeService.getTotalPayouts(req.user.email);
         if (payoutsBalance) {
-            const payoutTotal =  payoutsBalance?.data.length ? payoutsBalance?.data.reduce((prev:any,item:any)=>{
-                return prev+item.amount
-            },0):0;
-            res.data[2].amount = payoutTotal/100
+            const payoutTotal = payoutsBalance?.data.length ? payoutsBalance?.data.reduce((prev: any, item: any) => {
+                return prev + item.amount
+            }, 0) : 0;
+            res.data[2].amount = payoutTotal / 100
         }
         return res;
     }
@@ -425,11 +425,11 @@ export class StripeController {
         };
         const payoutsBalance = await this.stripeService.getTotalPayouts(req.user.email);
         if (payoutsBalance) {
-            const payoutTotal =  payoutsBalance?.data.length ? payoutsBalance?.data.reduce((prev:any,item:any)=>{
-                 return prev+item.amount
-            },0):0
+            const payoutTotal = payoutsBalance?.data.length ? payoutsBalance?.data.reduce((prev: any, item: any) => {
+                return prev + item.amount
+            }, 0) : 0
             res.status = 200;
-            res.data.payouts = payoutTotal/100;
+            res.data.payouts = payoutTotal / 100;
             res.message = DATA_FOUND;
         } else {
             res.status = 400;
@@ -449,14 +449,15 @@ export class StripeController {
         };
         const payouts = await this.stripeService.getTotalPayouts(req.user.email);
         if (payouts) {
-            const transactions =  payouts?.data.length ? payouts?.data.map((item:any)=>{
-                 return {
-                    amount:  item?.amount,
-                    description:item?.description,
+            const transactions = payouts?.data.length ? payouts?.data.map((item: any) => {
+                return {
+                    amount: item?.amount,
+                    description: item?.description,
                     type: item?.type,
                     method: item?.method,
-                    created:item?.created,}
-            }):[]
+                    created: item?.created,
+                }
+            }) : []
             res.status = 200;
             res.data = transactions;
             res.message = DATA_FOUND;
@@ -468,18 +469,5 @@ export class StripeController {
         return res;
     }
 
-    @Post('coach-withdrawal')
-    async coachWithdrawal() {
-        let res = {
-            status: 400,
-            message: DATA_NOT_FOUND,
-        }
-        let result = await this.stripeService.coachWithdrawalAmountLedger();
-        if (result) {
-            res.status = 200;
-            res.message = SUCCESSFULLY_SAVED;
-        }
-        return res
-    }
 }
 

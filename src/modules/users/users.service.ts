@@ -1,28 +1,23 @@
-import {Injectable} from '@nestjs/common';
-import {CreateUserDto} from './dto/create-user.dto';
-import {User} from './schemas/users.schema';
-import {UsersRepository} from './users.repository';
-import {StripeService} from "@/modules/stripe/stripe.service";
-import {UploadsService} from '@/modules/uploads/uploads.service';
-import {PERSONAL_INFORMATION, TRUE_SELF_INCOMPLETE} from '@/constants/rabbitMqEvents';
-import {RabbitMqService} from '@/modules/rabbit-mq/rabbit-mq.service';
-import {APPROVED, REJECTED} from '@/constants/coachStatusConstants';
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './schemas/users.schema';
+import { UsersRepository } from './users.repository';
+import { StripeService } from "@/modules/stripe/stripe.service";
+import { UploadsService } from '@/modules/uploads/uploads.service';
+import { PERSONAL_INFORMATION, TRUE_SELF_INCOMPLETE } from '@/constants/rabbitMqEvents';
+import { RabbitMqService } from '@/modules/rabbit-mq/rabbit-mq.service';
+import { APPROVED, REJECTED } from '@/constants/coachStatusConstants';
 import axios from 'axios';
-import {AnswersService} from '@/modules/answers/answers.service';
-import {ASSET, COACH, COACH_WALLET, USER_WALLET} from '@/constants/constants';
-import {AnswersRepository} from '@/modules/answers/answers.repository';
-import {WalletAccountsService} from '@/modules/wallet-accounts/wallet-accounts.service';
+import { ASSET, COACH, COACH_WALLET, USER_WALLET } from '@/constants/constants';
 
-import {api} from '@/helpers/ghost.helper'
+import { api } from '@/helpers/ghost.helper'
 
 
 @Injectable()
 export class UsersService {
     constructor(private readonly usersRepository: UsersRepository,
-                private readonly uploadsService: UploadsService,
-                private readonly rabbitMqService: RabbitMqService,
-                private readonly answersRepository: AnswersRepository,
-                private readonly walletAccountsService: WalletAccountsService
+        private readonly uploadsService: UploadsService,
+        private readonly rabbitMqService: RabbitMqService,
     ) {
     }
 
@@ -66,9 +61,8 @@ export class UsersService {
                     // Create member on Ghost
                     await api.members.add({
                         email: extraDataForGhost.email,
-                        name: `${extraDataForGhost.first_name || ''} ${
-                            extraDataForGhost.last_name || ''
-                        }`,
+                        name: `${extraDataForGhost.first_name || ''} ${extraDataForGhost.last_name || ''
+                            }`,
                     });
 
                 }
@@ -105,22 +99,6 @@ export class UsersService {
             }
         }
 
-        //check if user update their role then check and create wallet of that user
-        if (data.role && data.role.includes('coach')) {
-            await this.walletAccountsService.findOneAndUpdate({
-                user_id: user?.user_id,
-                name: COACH_WALLET
-            }, {user_id: user?.user_id, name: COACH_WALLET, type: ASSET, wallet: 0})
-            await this.walletAccountsService.findOneAndUpdate({
-                user_id: user?.user_id,
-                name: USER_WALLET
-            }, {user_id: user?.user_id, name: USER_WALLET, type: ASSET, wallet: 0})
-        } else if (data.role && data.role.includes('user')) {
-            await this.walletAccountsService.findOneAndUpdate({
-                user_id: user?.user_id,
-                name: USER_WALLET
-            }, {user_id: user?.user_id, name: USER_WALLET, type: ASSET, wallet: 0})
-        }
 
         if (data.avatar) {
             const extension = data.avatar.split(';')[0].split('/')[1]
@@ -140,13 +118,13 @@ export class UsersService {
 
         //add event into rabbitMQ Queue
         // @ts-ignore
-        await this.rabbitMqService.eventEmitterOnRabbitMQ(PERSONAL_INFORMATION, {user_id: user.user_id});
+        await this.rabbitMqService.eventEmitterOnRabbitMQ(PERSONAL_INFORMATION, { user_id: user.user_id });
 
         return this.usersRepository.updateUser(criteria, data);
     }
 
     async updateByEmail(email: string, data: any): Promise<any> {
-        return this.usersRepository.updateByEmail({email}, data);
+        return this.usersRepository.updateByEmail({ email }, data);
     }
 
     async createOrUpdateDeviceId(email: string, data: any): Promise<any> {
@@ -162,7 +140,7 @@ export class UsersService {
     }
 
     async updateCoachStatusByEmail(data: any): Promise<any> {
-        const result = await this.usersRepository.updateUser({user_id: data.user_id}, {coach_status: data.coach_status});
+        const result = await this.usersRepository.updateUser({ user_id: data.user_id }, { coach_status: data.coach_status });
         //if status id approved then we will create coach account on nylas
         if (data.coach_status === APPROVED) {
             const user = await this.usersRepository.findUserByUserId(data.user_id);
@@ -211,7 +189,7 @@ export class UsersService {
                     nylasCalendarId: calendar.data.id,
                     is_coach_approved: true
                 }
-                await this.usersRepository.updateUser({user_id: data.user_id}, nylasData);
+                await this.usersRepository.updateUser({ user_id: data.user_id }, nylasData);
             }
         }
         //if status is rejected then we will delete assessment of this user
@@ -221,7 +199,6 @@ export class UsersService {
                 user_id: data.user_id,
                 reasoning_id: data.reason_id
             });
-            const deleteAnswers = await this.answersRepository.deleteAnswers({user_id: data.user_id, role: COACH});
         }
         return result
     }

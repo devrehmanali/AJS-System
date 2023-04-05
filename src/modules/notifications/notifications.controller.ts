@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Put, Req, UseGuards} from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 import {
     ApiBearerAuth,
     ApiInternalServerErrorResponse,
@@ -6,17 +6,16 @@ import {
     ApiTags,
     ApiUnauthorizedResponse
 } from '@nestjs/swagger';
-import {JwtAuthGuard} from '@auth/guards/jwt-auth.guard';
-import {DATA_FOUND, DATA_NOT_FOUND, DATA_UPDATED, INTERNAL_SERVER_ERROR} from '@/constants/constants';
-import {NotificationsService} from '@/modules/notifications/notifications.service';
+import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { DATA_FOUND, DATA_NOT_FOUND, DATA_UPDATED, INTERNAL_SERVER_ERROR } from '@/constants/constants';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
 import RequestWithUserInterface from '@interfaces/request-with-user.interface';
-import {UpdatePublicationDto} from '@/modules/publications/dto/update-publication.dto';
-import {UpdateNotificationsUnseenStatusDto} from '@/modules/notifications/dto/update-notifications-unseen-status.dto';
+import { UpdateNotificationsUnseenStatusDto } from '@/modules/notifications/dto/update-notifications-unseen-status.dto';
 
 @ApiTags('Notifications')
 @Controller('notifications')
 export class NotificationsController {
-    constructor(private readonly notificationsService: NotificationsService) {}
+    constructor(private readonly notificationsService: NotificationsService) { }
 
     @ApiOkResponse({
         schema: {

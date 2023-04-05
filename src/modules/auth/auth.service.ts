@@ -21,11 +21,9 @@ import { generateRandom } from '@helpers/general.helper';
 import ForgotPasswordDto from '@auth/dto/forgot-password.dto';
 import { Cache } from 'cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
-import { ReferralService } from '@/modules/referral/referral.service';
-import { FollowRequestRepository } from '@/modules/follow-request/follow-request.repository';
 import axios from 'axios';
-import {StripeService} from '@/modules/stripe/stripe.service';
-import {RabbitMqService} from '@/modules/rabbit-mq/rabbit-mq.service';
+import { StripeService } from '@/modules/stripe/stripe.service';
+import { RabbitMqService } from '@/modules/rabbit-mq/rabbit-mq.service';
 import {
   RESET_PASSWORD,
   RESET_PASSWORD_OTP,
@@ -33,21 +31,19 @@ import {
   TRUE_SELF_INCOMPLETE,
   UPDATE_PASSWORD
 } from '@/constants/rabbitMqEvents';
-import {COACH, EMAIL_NOT_FOUND, INCORRECT_PASSWORD} from '@/constants/constants';
-import {DRAFT} from '@/constants/coachStatusConstants';
+import { COACH, EMAIL_NOT_FOUND, INCORRECT_PASSWORD } from '@/constants/constants';
+import { DRAFT } from '@/constants/coachStatusConstants';
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private followRequestRepository: FollowRequestRepository,
-    private referralService: ReferralService,
     private jwtService: JwtService,
     private repository: AuthRepository,
     private readonly mailerService: MailerService,
     private readonly stripeService: StripeService,
     private readonly rabbitMqService: RabbitMqService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  ) { }
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findUserByEmail(email);
@@ -72,7 +68,7 @@ export class AuthService {
     await this.repository.addRefreshToken(user.email, refreshToken);
 
     //check if device id exist
-    if(data.body.device_id) {
+    if (data.body.device_id) {
       await this.usersService.createOrUpdateDeviceId(user.email, { device_id: data.body.device_id });
     }
 
@@ -80,12 +76,12 @@ export class AuthService {
 
     if (!user.is_user_assessment_completed) {
       //add event into rabbitMQ Queue
-      await this.rabbitMqService.eventEmitterOnRabbitMQ(TRUE_SELF_INCOMPLETE, {user_id: user.user_id});
+      await this.rabbitMqService.eventEmitterOnRabbitMQ(TRUE_SELF_INCOMPLETE, { user_id: user.user_id });
     }
 
     if (!user.is_coach_assessment_completed && user.role.includes('coach')) {
       //add event into rabbitMQ Queue
-      await this.rabbitMqService.eventEmitterOnRabbitMQ(TRUE_SELF_INCOMPLETE, {user_id: user.user_id});
+      await this.rabbitMqService.eventEmitterOnRabbitMQ(TRUE_SELF_INCOMPLETE, { user_id: user.user_id });
     }
 
     return {
@@ -181,7 +177,7 @@ export class AuthService {
         signUpUserDto.first_name,
       );
 
-     
+
       const user = await this.usersService.createUser({
         ...signUpUserDto,
         // nylasAccountId: connectNylas.data.account_id,
@@ -193,10 +189,10 @@ export class AuthService {
       });
 
       //add event into rabbitMQ Queue
-      await this.rabbitMqService.eventEmitterOnRabbitMQ(SIGNUP_TO_WELLAVI, {user_id: user.user_id});
+      await this.rabbitMqService.eventEmitterOnRabbitMQ(SIGNUP_TO_WELLAVI, { user_id: user.user_id });
 
       //check if device id exist
-      if(signUpUserDto.device_id) {
+      if (signUpUserDto.device_id) {
         await this.usersService.createOrUpdateDeviceId(user.email, { device_id: signUpUserDto.device_id });
       }
 
@@ -213,23 +209,6 @@ export class AuthService {
           following_user_id: ReferralUserId,
         };
 
-        await this.referralService.findOneAndUpdate(
-          { user_id: user.user_id },
-          data,
-          {
-            new: true,
-            upsert: true, // Make this update into an upsert
-          },
-        );
-
-        await this.followRequestRepository.findOneAndUpdate(
-          { user_id: user.user_id },
-          followData,
-          {
-            new: true,
-            upsert: true, // Make this update into an upsert
-          },
-        );
       }
 
       const payload = await this.payload(user);
@@ -266,7 +245,7 @@ export class AuthService {
 
     const userData = await this.usersService.findUserByEmail(user.email)
     //add event into rabbitMQ Queue
-    await this.rabbitMqService.eventEmitterOnRabbitMQ(UPDATE_PASSWORD, {user_id: userData?.user_id});
+    await this.rabbitMqService.eventEmitterOnRabbitMQ(UPDATE_PASSWORD, { user_id: userData?.user_id });
 
     return this.usersService.updateUser(
       { email: user.email } as User,
@@ -305,7 +284,7 @@ export class AuthService {
     const otp = generateRandom(20);
 
     //add event into rabbitMQ Queue
-    await this.rabbitMqService.eventEmitterOnRabbitMQ(RESET_PASSWORD_OTP, {user_id: userData.user_id});
+    await this.rabbitMqService.eventEmitterOnRabbitMQ(RESET_PASSWORD_OTP, { user_id: userData.user_id });
 
     // Todo needs to generate mail
     this.mailerService
@@ -349,7 +328,7 @@ export class AuthService {
         } as User,
       );
       //add event into rabbitMQ Queue
-      await this.rabbitMqService.eventEmitterOnRabbitMQ(RESET_PASSWORD, {user_id: user.user_id});
+      await this.rabbitMqService.eventEmitterOnRabbitMQ(RESET_PASSWORD, { user_id: user.user_id });
 
       return updateResult;
     } catch (e: any) {

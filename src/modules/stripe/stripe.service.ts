@@ -4,7 +4,7 @@ import { DeleteCardDto } from "@/modules/stripe/dto/delete-card.dto";
 import { CreateSubscriptionDto } from '@/modules/stripe/dto/create-subscription.dto';
 import { StripeRepository } from '@/modules/stripe/stripe.repository';
 import { UpdatePaymentMethodDefaultDto } from '@/modules/stripe/dto/update-payment-method-default.dto';
-import {ProductsService} from '@/modules/products/products.service';
+import { ProductsService } from '@/modules/products/products.service';
 import {
     ASSET,
     COACH,
@@ -21,16 +21,13 @@ import {
     USER_WALLET,
     WELLAVI_CASH_WALLET
 } from '@/constants/constants';
-import {WalletAccountsService} from '@/modules/wallet-accounts/wallet-accounts.service';
-import {LedgerService} from '@/modules/ledger/ledger.service';
 
 @Injectable()
 export class StripeService {
     constructor(private usersService: UsersService,
-                private stripeRepository: StripeRepository,
-                private productsService: ProductsService,
-                private walletAccountsService: WalletAccountsService,
-                private ledgerService: LedgerService) {
+        private stripeRepository: StripeRepository,
+        private productsService: ProductsService,
+    ) {
     }
 
     async createCard(req: any, data: object): Promise<object | null> {
@@ -182,20 +179,6 @@ export class StripeService {
         });
 
         //check who purchase subscription user or coach then update that type of role balance
-        let userWallet
-        if (body.type === USER) {
-            //fetch user wallet
-            userWallet = await this.walletAccountsService.findWalletByUserIdAndType(user_id, USER_WALLET)
-            //fetch user subscription revenue wallet
-            const userSubscriptionRevenueWallet = await this.walletAccountsService.findWalletByType(USER_SUBSCRIPTION_REVENUE_WALLET)
-            await this.userLedger(userWallet, subscription.plan.amount/100, userSubscriptionRevenueWallet)
-        } else if (body.type === COACH) {
-            //fetch user wallet
-            userWallet = await this.walletAccountsService.findWalletByUserIdAndType(user_id, COACH_WALLET)
-            //fetch coach subscription revenue wallet
-            const coachSubscriptionRevenueWallet = await this.walletAccountsService.findWalletByType(COACH_SUBSCRIPTION_REVENUE_WALLET)
-            await this.userLedger(userWallet, subscription.plan.amount/100, coachSubscriptionRevenueWallet)
-        }
         const data = {
             user_id: user_id,
             subscription_id: subscription.id,
@@ -292,8 +275,8 @@ export class StripeService {
         const sessionObjectId = ObjectId(sessionId)
         // find Approved sessions against user
         const userSession = await this.stripeRepository.findApprovedSessions(sessionObjectId);
-         if (userSession) {
-            if(data.type === 'coach' && userSession.user_feedback) {
+        if (userSession) {
+            if (data.type === 'coach' && userSession.user_feedback) {
                 const responseAfterPayment = await this.createPaymentOnStripe(userSession)
                 //filtered data to store in DB
                 storingData = {
@@ -372,7 +355,7 @@ export class StripeService {
         );
         // Create a Transfer to the connected account (later):
         const transfer = await stripe.transfers.create({
-            amount: (userSession.price* 100) - applicationFee,
+            amount: (userSession.price * 100) - applicationFee,
             currency: 'usd',
             destination: userSession.customer_connect_account_id,
         });
@@ -415,26 +398,6 @@ export class StripeService {
             wellaviWalletAmount = planAmount - stripeFee // 49 - 1.72 = 47.27
         }
 
-        //fetch wellavi wallet
-        const wellaviWallet = await this.walletAccountsService.findWalletByType(WELLAVI_CASH_WALLET)
-        //fetch subscription fee wallet
-        const subscriptionFeeWallet = await this.walletAccountsService.findWalletByType(STRIPE_SUBSCRIPTION_FEE_WALLET)
-
-        //update subscription revenue wallet
-        await this.walletAccountsService.updateWalletById(userSubscriptionRevenueWallet._id, planAmount, CREDIT)
-        //update user wallet
-        await this.walletAccountsService.updateWalletById(userWallet._id, planAmount - wellaviWalletAmount - stripeFee, CREDIT)
-        //update wellavi wallet
-        await this.walletAccountsService.updateWalletById(wellaviWallet._id, wellaviWalletAmount, CREDIT)
-        //update stripe subscription fee wallet
-        await this.walletAccountsService.updateWalletById(subscriptionFeeWallet._id, stripeFee, DEBIT)
-
-        //entries into ledger
-        await this.ledgerService.insertBalance(userSubscriptionRevenueWallet.type, userSubscriptionRevenueWallet._id, planAmount, 0 )
-        await this.ledgerService.insertBalance(userWallet.type, userWallet._id, 0, planAmount)
-        await this.ledgerService.insertBalance(userWallet.type, userWallet._id,wellaviWalletAmount + stripeFee, 0 )
-        await this.ledgerService.insertBalance(wellaviWallet.type, wellaviWallet._id,0, wellaviWalletAmount)
-        await this.ledgerService.insertBalance(subscriptionFeeWallet.type, subscriptionFeeWallet._id,0, stripeFee )
 
         return true;
     }
@@ -457,55 +420,7 @@ export class StripeService {
         //Calculating percentage of application fee in dollar
         const wellaviFee = (userSessionData.price * wellaviPercentage) / 100
 
-        //fetch escrow wallet
-        const escrowWallet = await this.walletAccountsService.findWalletByType(ESCROW_ACCOUNT_WALLET)
-        //fetch wellavi wallet
-        const wellaviWallet = await this.walletAccountsService.findWalletByType(WELLAVI_CASH_WALLET)
-        //fetch coach session expense wallet
-        const coachSessionExpenseWallet = await this.walletAccountsService.findWalletByType(COACHING_SESSION_EXPENSES)
-        //fetch stripe Transaction Fee wallet
-        const stripeTransactionFeeWallet = await this.walletAccountsService.findWalletByType(STRIPE_TRANSACTION_FEE)
-        //fetch coach wallet
-        const coachWallet = await this.walletAccountsService.findWalletByUserIdAndType(userSessionData.coach_id, COACH_WALLET)
-
-
-        //update escrow  wallet
-        await this.walletAccountsService.updateWalletById(escrowWallet._id, userSessionData.price, DEBIT)
-        //update wellavi wallet
-        await this.walletAccountsService.updateWalletById(wellaviWallet._id, wellaviFee, CREDIT)
-        //update coach session expense  wallet
-        await this.walletAccountsService.updateWalletById(coachSessionExpenseWallet._id, stripeFee, CREDIT)
-        await this.walletAccountsService.updateWalletById(coachSessionExpenseWallet._id, stripeFee, DEBIT)
-        //update stripe transaction fee wallet
-        await this.walletAccountsService.updateWalletById(stripeTransactionFeeWallet._id, stripeFee, DEBIT)
-        //update coach wallet
-        await this.walletAccountsService.updateWalletById(coachWallet._id, userSessionData.price - wellaviFee - stripeFee, CREDIT)
-
-        //entries into ledger
-        await this.ledgerService.insertBalance(escrowWallet.type, escrowWallet._id, userSessionData.price, 0 )
-        await this.ledgerService.insertBalance(wellaviWallet.type, wellaviWallet._id, 0, wellaviFee )
-        await this.ledgerService.insertBalance(coachSessionExpenseWallet.type, coachSessionExpenseWallet._id, 0, stripeFee )
-        await this.ledgerService.insertBalance(coachSessionExpenseWallet.type, coachSessionExpenseWallet._id, stripeFee, 0 )
-        await this.ledgerService.insertBalance(stripeTransactionFeeWallet.type, stripeTransactionFeeWallet._id, 0, stripeFee )
-        await this.ledgerService.insertBalance(coachWallet.type, coachWallet._id, 0, userSessionData.price - wellaviFee - stripeFee )
         return true;
     }
 
-    async coachWithdrawalAmountLedger() {
-        const user_id = '3f4bb4b9-98c4-456a-ab00-96155bef7d42'
-        //fetch coach wallet
-        const coachWallet = await this.walletAccountsService.findWalletByUserIdAndType(user_id, COACH_WALLET)
-        //fetch coach withdrawal payable
-        const coachWithdrawalPayable = await this.walletAccountsService.findWalletByType(COACH_WITHDRAWAL_PAYABLE)
-        const withdrawalAmount = coachWallet.wallet
-        //update coach wallet
-        await this.walletAccountsService.updateWalletById(coachWallet._id, withdrawalAmount, DEBIT)
-        //update coach withdrawal payable wallet
-        await this.walletAccountsService.updateWalletById(coachWithdrawalPayable._id, withdrawalAmount, DEBIT)
-
-        //entries into ledger
-        await this.ledgerService.insertBalance(coachWallet.type, coachWallet._id, withdrawalAmount, 0 )
-        await this.ledgerService.insertBalance(coachWithdrawalPayable.type, coachWithdrawalPayable._id, 0, withdrawalAmount )
-        return true;
-    }
 }

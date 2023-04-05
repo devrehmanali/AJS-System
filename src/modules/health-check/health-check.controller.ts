@@ -1,7 +1,4 @@
-import {Controller, Get} from '@nestjs/common';
-import {FollowRequestService} from '@/modules/follow-request/follow-request.service';
-import {SessionsService} from '@/modules/sessions/sessions.service';
-import {ViewsService} from '@/modules/views/views.service';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller('health-check')
 export class HealthCheckController {
