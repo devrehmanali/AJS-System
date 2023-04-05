@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/users.schema';
 import { UsersRepository } from './users.repository';
-import { StripeService } from "@/modules/stripe/stripe.service";
 import { UploadsService } from '@/modules/uploads/uploads.service';
 import { PERSONAL_INFORMATION, TRUE_SELF_INCOMPLETE } from '@/constants/rabbitMqEvents';
-import { RabbitMqService } from '@/modules/rabbit-mq/rabbit-mq.service';
 import { APPROVED, REJECTED } from '@/constants/coachStatusConstants';
 import axios from 'axios';
 import { ASSET, COACH, COACH_WALLET, USER_WALLET } from '@/constants/constants';
@@ -17,7 +15,6 @@ import { api } from '@/helpers/ghost.helper'
 export class UsersService {
     constructor(private readonly usersRepository: UsersRepository,
         private readonly uploadsService: UploadsService,
-        private readonly rabbitMqService: RabbitMqService,
     ) {
     }
 

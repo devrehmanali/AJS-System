@@ -11,15 +11,11 @@ import AuthRepository from '@auth/auth.repository';
 import { GoogleStrategy } from '@auth/strategies/google.strategy';
 import { LinkedinStrategy } from '@auth/strategies/linkedin.strategy';
 import { FacebookStrategy } from '@auth/strategies/facebook.strategy';
-import { StripeModule } from '@/modules/stripe/stripe.module';
-import { RabbitMqModule } from '@/modules/rabbit-mq/rabbit-mq.module';
 
 @Module({
   imports: [
     PassportModule,
     UsersModule,
-    StripeModule,
-    RabbitMqModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

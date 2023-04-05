@@ -5,7 +5,6 @@ import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 import { UsersController } from "@users/users.controller";
 import { UploadsModule } from '@/modules/uploads/uploads.module';
-import { RabbitMqModule } from '@/modules/rabbit-mq/rabbit-mq.module';
 import { CoachRejectionReasoning, CoachRejectionReasoningSchema } from '@users/schemas/coach-rejection-reasoning.schema';
 import { UserDeviceIds, UserDeviceIdsSchema } from '@users/schemas/user-device-ids.schema';
 
@@ -16,7 +15,6 @@ import { UserDeviceIds, UserDeviceIdsSchema } from '@users/schemas/user-device-i
             schema: CoachRejectionReasoningSchema
         }, { name: UserDeviceIds.name, schema: UserDeviceIdsSchema }]),
         UploadsModule,
-        forwardRef(() => RabbitMqModule)
     ],
     controllers: [UsersController],
     providers: [UsersService, UsersRepository],

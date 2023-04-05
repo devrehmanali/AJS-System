@@ -7,33 +7,27 @@ import UsersModule from '@users/users.module';
 import { SeedsModule } from '@/shared/seeds.module';
 import { CommandModule } from 'nestjs-command';
 import { MailerModule } from '@nestjs-modules/mailer';
-import ProfileModule from './profile/profile.module';
-import SettingModule from "@/modules/setting/setting.module";
-import {UploadsModule} from "@/modules/uploads/uploads.module";
-import { StripeModule } from './stripe/stripe.module'
-import {ServeStaticModule} from '@nestjs/serve-static';
+import { UploadsModule } from "@/modules/uploads/uploads.module";
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { resolve } from 'path';
-import {AppController} from '@/modules/app.controller';
-import { RabbitMqModule } from './rabbit-mq/rabbit-mq.module';
-import { NotificationsModule } from './notifications/notifications.module';
-import { ProductsModule } from './products/products.module';
+import { AppController } from '@/modules/app.controller';
 import { HealthCheckModule } from './health-check/health-check.module';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot(
-        (() => {
-          const publicDir = resolve('./public/');
-          const servePath = '/';
+      (() => {
+        const publicDir = resolve('./public/');
+        const servePath = '/';
 
-          return {
-            rootPath: publicDir,
-            // serveRoot - if you want to see files on another controller,
-            // e.g.: http://localhost:8088/files/1.png
-            serveRoot: servePath,
-            exclude: ['/api*'],
-          };
-        })()
+        return {
+          rootPath: publicDir,
+          // serveRoot - if you want to see files on another controller,
+          // e.g.: http://localhost:8088/files/1.png
+          serveRoot: servePath,
+          exclude: ['/api*'],
+        };
+      })()
     ),
     ConfigModule.forRoot({
       cache: true,
@@ -66,17 +60,11 @@ import { HealthCheckModule } from './health-check/health-check.module';
     }),
     AuthModule,
     UsersModule,
-    ProfileModule,
     SeedsModule,
     CommandModule,
-    SettingModule,
     UploadsModule,
-    StripeModule,
-    RabbitMqModule,
-    NotificationsModule,
-    ProductsModule,
     HealthCheckModule,
   ],
   controllers: [AppController]
 })
-export class AppModule {}
+export class AppModule { }

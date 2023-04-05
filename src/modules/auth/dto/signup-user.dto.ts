@@ -32,7 +32,4 @@ export class SignUpUserDto {
   @MaxLength(64)
   password: string;
 
-  @ApiProperty()
-  @IsOptional()
-  readonly device_id: string;
 }

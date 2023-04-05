@@ -21,18 +21,7 @@ import { generateRandom } from '@helpers/general.helper';
 import ForgotPasswordDto from '@auth/dto/forgot-password.dto';
 import { Cache } from 'cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
-import axios from 'axios';
-import { StripeService } from '@/modules/stripe/stripe.service';
-import { RabbitMqService } from '@/modules/rabbit-mq/rabbit-mq.service';
-import {
-  RESET_PASSWORD,
-  RESET_PASSWORD_OTP,
-  SIGNUP_TO_WELLAVI,
-  TRUE_SELF_INCOMPLETE,
-  UPDATE_PASSWORD
-} from '@/constants/rabbitMqEvents';
-import { COACH, EMAIL_NOT_FOUND, INCORRECT_PASSWORD } from '@/constants/constants';
-import { DRAFT } from '@/constants/coachStatusConstants';
+import { EMAIL_NOT_FOUND, INCORRECT_PASSWORD } from '@/constants/constants';
 @Injectable()
 export class AuthService {
   constructor(
@@ -40,8 +29,6 @@ export class AuthService {
     private jwtService: JwtService,
     private repository: AuthRepository,
     private readonly mailerService: MailerService,
-    private readonly stripeService: StripeService,
-    private readonly rabbitMqService: RabbitMqService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
@@ -74,15 +61,6 @@ export class AuthService {
 
     await this.usersService.updateByEmail(user.email, { isLoggedIn: true });
 
-    if (!user.is_user_assessment_completed) {
-      //add event into rabbitMQ Queue
-      await this.rabbitMqService.eventEmitterOnRabbitMQ(TRUE_SELF_INCOMPLETE, { user_id: user.user_id });
-    }
-
-    if (!user.is_coach_assessment_completed && user.role.includes('coach')) {
-      //add event into rabbitMQ Queue
-      await this.rabbitMqService.eventEmitterOnRabbitMQ(TRUE_SELF_INCOMPLETE, { user_id: user.user_id });
-    }
 
     return {
       access_token: this.jwtService.sign(payload),
@@ -133,63 +111,9 @@ export class AuthService {
         return null;
       }
 
-      // // Creating Nylas Calendar
-      // let authorizeNylas = await axios.post(
-      //   'https://api.nylas.com/connect/authorize',
-      //   {
-      //     client_id: process.env.NYLAS_CLIENT_ID,
-      //     provider: 'nylas',
-      //     scopes: 'calendar',
-      //     email: signUpUserDto.email,
-      //     name: signUpUserDto.first_name + ' ' + signUpUserDto.last_name,
-      //     settings: {},
-      //   },
-      // );
-      //
-      // let connectNylas = await axios.post(
-      //   'https://api.nylas.com/connect/token',
-      //   {
-      //     client_id: process.env.NYLAS_CLIENT_ID,
-      //     client_secret: process.env.NYLAS_CLIENT_SECRET,
-      //     code: authorizeNylas.data?.code,
-      //   },
-      // );
-      //
-      // let calendar = await axios.post(
-      //   'https://api.nylas.com/calendars',
-      //   {
-      //     name: signUpUserDto.first_name + "'s Calendar",
-      //     description: '',
-      //     location: '',
-      //     timezone: 'UTC',
-      //     metadata: {},
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${connectNylas?.data?.access_token}`,
-      //     },
-      //   },
-      // );
-
-      //Register user on stripe and create it as a customer
-      const customer = await this.stripeService.createCustomerOnStripe(
-        signUpUserDto.email,
-        signUpUserDto.first_name,
-      );
-
-
       const user = await this.usersService.createUser({
         ...signUpUserDto,
-        // nylasAccountId: connectNylas.data.account_id,
-        // nylasAccessToken: connectNylas.data.access_token,
-        // nylasCalendarId: calendar.data.id,
-        password: await AuthService.hashPassword(password),
-        stripe_customer_id: customer.id,
-        coach_status: DRAFT
       });
-
-      //add event into rabbitMQ Queue
-      await this.rabbitMqService.eventEmitterOnRabbitMQ(SIGNUP_TO_WELLAVI, { user_id: user.user_id });
 
       //check if device id exist
       if (signUpUserDto.device_id) {
@@ -244,8 +168,6 @@ export class AuthService {
     }
 
     const userData = await this.usersService.findUserByEmail(user.email)
-    //add event into rabbitMQ Queue
-    await this.rabbitMqService.eventEmitterOnRabbitMQ(UPDATE_PASSWORD, { user_id: userData?.user_id });
 
     return this.usersService.updateUser(
       { email: user.email } as User,
@@ -283,8 +205,6 @@ export class AuthService {
     }
     const otp = generateRandom(20);
 
-    //add event into rabbitMQ Queue
-    await this.rabbitMqService.eventEmitterOnRabbitMQ(RESET_PASSWORD_OTP, { user_id: userData.user_id });
 
     // Todo needs to generate mail
     this.mailerService
@@ -327,8 +247,6 @@ export class AuthService {
           password: await AuthService.hashPassword(reqBody.password),
         } as User,
       );
-      //add event into rabbitMQ Queue
-      await this.rabbitMqService.eventEmitterOnRabbitMQ(RESET_PASSWORD, { user_id: user.user_id });
 
       return updateResult;
     } catch (e: any) {
