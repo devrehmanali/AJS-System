@@ -99,6 +99,13 @@ export class User {
   })
   isLoggedIn?: boolean;
 
+  @Prop({
+    type: Boolean,
+    default: true,
+    index: true,
+  })
+  enabled?: boolean;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

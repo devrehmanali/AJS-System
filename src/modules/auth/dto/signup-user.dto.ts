@@ -33,9 +33,4 @@ export class SignUpUserDto {
   @MaxLength(64)
   password: string;
 
-  @ApiProperty()
-  @IsBoolean()
-  @IsNotEmpty()
-  enabled: string;
-
 }

@@ -1,29 +1,23 @@
-import {Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model} from 'mongoose';
-import {CreateUserDto} from './dto/create-user.dto';
-import {User, UserDocument} from './schemas/users.schema';
-import {v4 as uuidv4} from 'uuid';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User, UserDocument } from './schemas/users.schema';
+import { v4 as uuidv4 } from 'uuid';
 import {
     CoachRejectionReasoning,
     CoachRejectionReasoningDocument
 } from '@users/schemas/coach-rejection-reasoning.schema';
-import {UserDeviceIds, UserDeviceIdsDocument} from '@users/schemas/user-device-ids.schema';
+import { UserDeviceIds, UserDeviceIdsDocument } from '@users/schemas/user-device-ids.schema';
 
 @Injectable()
 export class UsersRepository {
     constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
-                @InjectModel(UserDeviceIds.name) private userDeviceIdsDocumentModel: Model<UserDeviceIdsDocument>,
-                @InjectModel(CoachRejectionReasoning.name) private coachRejectionModel: Model<CoachRejectionReasoningDocument>) {
-    }
+    ) { }
 
     async createUser(user: CreateUserDto): Promise<any> {
         user.user_id = uuidv4();
         return await this.userModel.create(user);
-    }
-
-    async createRejectionReasoning(data: any): Promise<any> {
-        return await this.coachRejectionModel.create(data);
     }
 
     async updateUser(criteria: object, data: object): Promise<any> {
@@ -32,10 +26,6 @@ export class UsersRepository {
 
     async updateByEmail(criteria: { email: string }, data: any): Promise<any> {
         return this.userModel.updateOne(criteria, data);
-    }
-
-    async findOneAndUpdate(filter: any, data: any, options: object): Promise<object | null> {
-        return this.userDeviceIdsDocumentModel.findOneAndUpdate(filter,data, options);
     }
 
     async findUserByEmailAndLoggedIn(email: string): Promise<User | null> {
@@ -59,19 +49,19 @@ export class UsersRepository {
 
     async findCoachList(email: string): Promise<User[] | null> {
         return this.userModel.find({
-            role: {$in: "coach"},
-            email: {$ne: email}
+            role: { $in: "coach" },
+            email: { $ne: email }
         });
     }
 
     async findAllUsersList(page: string, limit: string): Promise<any> {
         const pageInInt = parseInt(page, 10) || 0
         const limitInInt = parseInt(limit, 10) || 10
-        return this.userModel.find().sort({createdAt: 'desc'}).limit(limitInInt).skip(limitInInt * pageInInt );
+        return this.userModel.find().sort({ createdAt: 'desc' }).limit(limitInInt).skip(limitInInt * pageInInt);
     }
 
     async findUserByUserId(user_id: any): Promise<User | null> {
-        return this.userModel.findOne({user_id: user_id});
+        return this.userModel.findOne({ user_id: user_id });
     }
 
     async findLastByUserId(): Promise<any | null> {
@@ -81,7 +71,7 @@ export class UsersRepository {
                     user_id: -1,
                 },
             },
-            {$limit: 1},
+            { $limit: 1 },
         ]);
     }
 
@@ -93,8 +83,8 @@ export class UsersRepository {
             country: 'US',
             email: 'wellavi.dev@gmail.com',
             capabilities: {
-                card_payments: {requested: true},
-                transfers: {requested: true},
+                card_payments: { requested: true },
+                transfers: { requested: true },
             },
         });
 

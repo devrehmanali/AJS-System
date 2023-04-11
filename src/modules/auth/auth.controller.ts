@@ -209,7 +209,7 @@ export class AuthController {
     @Query('user_id') userId?: string,
     @Query('type') type?: string
   ): Promise<object> {
-    const tokens = await this.authService.signup(req.body, userId, type);
+    const tokens = await this.authService.signup(req.body);
     if (tokens == null) {
       return {
         status: 400,

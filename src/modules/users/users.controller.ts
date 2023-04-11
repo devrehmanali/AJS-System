@@ -32,83 +32,83 @@ import {
   INTERNAL_SERVER_ERROR,
   INVALID_PASSWORD,
 } from '@/constants/constants';
-import {array, boolean, object} from 'joi';
+import { array, boolean, object } from 'joi';
 import RequestUserInterface from '@/interfaces/request-user.interface';
 import { User } from '@/decorators/user.decorator';
 import axios from 'axios';
 import { google } from 'googleapis';
-import {UpdateCoachStatusDto} from '@users/dto/update-coach-status.dto';
+import { UpdateCoachStatusDto } from '@users/dto/update-coach-status.dto';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
-
-    @ApiOkResponse({
-        schema: {
-            type: 'object',
-            example:
-                {"status": 200, "message": DATA_UPDATED},
-        },
-        description: '200, update settings',
-    })
-    @ApiUnauthorizedResponse({
-        schema: {
-            type: 'object',
-            example: {
-                status: 401, message: 'string',
-            },
-        },
-        description: 'Token has been expired',
-    })
-    @ApiInternalServerErrorResponse({
-        schema: {
-            type: 'object',
-            example: {
-                status: 500,
-                message: 'string'
-            },
-        },
-        description: 'Internal Server Error',
-    })
-    @ApiBadRequestResponse({
-        schema: {
-            type: 'object',
-            example:
-                {"status": 400, "message": "string"},
-
-        },
-        description: '400, return bad request error',
-    })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    @ApiBody({type: UpdateUserDto})
-    @Put('update-user')
-    async updateUser(@Req() req: RequestWithUserInterface,
-                     @Body() data: UpdateUserDto) {
-        let res = {
-            status: 500,
-            message: INTERNAL_SERVER_ERROR
-        }
-        // @ts-ignore
-        let result = await this.userService.updateUser({email: req.user.email}, data, req, {
-          email: req.user.email,
-          first_name: req.user.first_name,
-          last_name: req.user.last_name
-        });
-
-        if (result) {
-            res.status = 200;
-            res.message = DATA_UPDATED;
-        }
-        return res
-    }
+  constructor(private readonly userService: UsersService) { }
 
   @ApiOkResponse({
     schema: {
       type: 'object',
       example:
-          {"status": 200, "message": DATA_UPDATED},
+        { "status": 200, "message": DATA_UPDATED },
+    },
+    description: '200, update settings',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        status: 401, message: 'string',
+      },
+    },
+    description: 'Token has been expired',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        status: 500,
+        message: 'string'
+      },
+    },
+    description: 'Internal Server Error',
+  })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'object',
+      example:
+        { "status": 400, "message": "string" },
+
+    },
+    description: '400, return bad request error',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiBody({ type: UpdateUserDto })
+  @Put('update-user')
+  async updateUser(@Req() req: RequestWithUserInterface,
+    @Body() data: UpdateUserDto) {
+    let res = {
+      status: 500,
+      message: INTERNAL_SERVER_ERROR
+    }
+    // @ts-ignore
+    let result = await this.userService.updateUser({ email: req.user.email }, data, req, {
+      email: req.user.email,
+      first_name: req.user.first_name,
+      last_name: req.user.last_name
+    });
+
+    if (result) {
+      res.status = 200;
+      res.message = DATA_UPDATED;
+    }
+    return res
+  }
+
+  @ApiOkResponse({
+    schema: {
+      type: 'object',
+      example:
+        { "status": 200, "message": DATA_UPDATED },
     },
     description: '200, update coach status',
   })
@@ -126,12 +126,12 @@ export class UsersController {
     schema: {
       type: 'object',
       example:
-          {"status": 400, "message": "string"},
+        { "status": 400, "message": "string" },
 
     },
     description: '400, return bad request error',
   })
-  @ApiBody({type: UpdateCoachStatusDto})
+  @ApiBody({ type: UpdateCoachStatusDto })
   @Put('update-coach-status')
   async updateCoachStatus(@Body() data: UpdateCoachStatusDto) {
     let res = {
@@ -193,7 +193,7 @@ export class UsersController {
       status: 500,
       message: INTERNAL_SERVER_ERROR,
     };
-    
+
     let user = await this.userService.findUserByEmail(req.user.email);
     if (
       user &&
@@ -320,7 +320,7 @@ export class UsersController {
   })
   @Get('all-users')
   async fetchAllUsers(@Query('page') page?: string,
-                      @Query('limit') limit?: string) {
+    @Query('limit') limit?: string) {
     let res = {
       status: 200,
       message: DATA_NOT_FOUND,
@@ -462,41 +462,41 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Post('/availability')
   async putAvailability(
-      @Req() req: RequestWithUserInterface,
-      @Body() availabilities: any,
-      ) {
+    @Req() req: RequestWithUserInterface,
+    @Body() availabilities: any,
+  ) {
     //@ts-ignore
-    let result = await this.userService.updateUser({email: req.user.email}, {availabilities}, req);
+    let result = await this.userService.updateUser({ email: req.user.email }, { availabilities }, req);
 
-        return {
-          success: true,
-        };
-      }
+    return {
+      success: true,
+    };
+  }
 
-    // @UseGuards(JwtAuthGuard)
-    @Post('/create-token')
-    async createToken(@Body() body: any) {
-      let code = body?.code;
-      let response;
-      const oauth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_NYLAS_CLIENT_ID,
-        process.env.GOOGLE_NYLAS_CLIENT_SECRET,
-        'https://wellavi-web1.herokuapp.com/settings',
-      );
-  
-      console.log(
-        process.env.GOOGLE_NYLAS_CLIENT_ID,
-        process.env.GOOGLE_NYLAS_CLIENT_SECRET,
-      );
-  
-      try {
-        response = await oauth2Client.getToken(code);
-      } catch (err) {
-        response = err;
-      }
-  
-      return response;
+  // @UseGuards(JwtAuthGuard)
+  @Post('/create-token')
+  async createToken(@Body() body: any) {
+    let code = body?.code;
+    let response;
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_NYLAS_CLIENT_ID,
+      process.env.GOOGLE_NYLAS_CLIENT_SECRET,
+      'https://wellavi-web1.herokuapp.com/settings',
+    );
+
+    console.log(
+      process.env.GOOGLE_NYLAS_CLIENT_ID,
+      process.env.GOOGLE_NYLAS_CLIENT_SECRET,
+    );
+
+    try {
+      response = await oauth2Client.getToken(code);
+    } catch (err) {
+      response = err;
     }
+
+    return response;
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('/availability')

@@ -96,9 +96,7 @@ export class AuthService {
   }
 
   async signup(
-    signUpUserDto: any,
-    ReferralUserId: string | undefined,
-    ReferralType: string | undefined,
+    signUpUserDto: any
   ): Promise<JwtTokensInterface | any> {
     try {
       const { password } = signUpUserDto;
@@ -114,26 +112,6 @@ export class AuthService {
       const user = await this.usersService.createUser({
         ...signUpUserDto,
       });
-
-      //check if device id exist
-      if (signUpUserDto.device_id) {
-        await this.usersService.createOrUpdateDeviceId(user.email, { device_id: signUpUserDto.device_id });
-      }
-
-      //insert or update id user has any referral code
-      if (ReferralUserId) {
-        const data = {
-          user_id: user.user_id,
-          referral_user_id: ReferralUserId,
-          referral_type: ReferralType,
-        };
-
-        const followData = {
-          user_id: user.user_id,
-          following_user_id: ReferralUserId,
-        };
-
-      }
 
       const payload = await this.payload(user);
 

@@ -38,62 +38,7 @@ export class UsersService {
             // @ts-ignore
             data.stripe_link_account_id = connectAccount?.account_id
         } else {
-            if (user?.nylasAccountId === 'false') {
-                // Creating Nylas Calendar
-                let authorizeNylas = await axios.post(
-                    'https://api.nylas.com/connect/authorize',
-                    {
-                        client_id: process.env.NYLAS_CLIENT_ID,
-                        provider: 'nylas',
-                        scopes: 'calendar',
-                        // @ts-ignore
-                        email: email,
-                        // @ts-ignore
-                        name: first_name + ' ' + last_name,
-                        settings: {},
-                    },
-                );
 
-                if (data.role && data.role.includes('user')) {
-                    // Create member on Ghost
-                    await api.members.add({
-                        email: extraDataForGhost.email,
-                        name: `${extraDataForGhost.first_name || ''} ${extraDataForGhost.last_name || ''
-                            }`,
-                    });
-
-                }
-
-                // @ts-ignore
-                const user = await this.usersRepository.findUserByEmail(req?.user?.email);
-                let connectNylas = await axios.post(
-                    'https://api.nylas.com/connect/token',
-                    {
-                        client_id: process.env.NYLAS_CLIENT_ID,
-                        client_secret: process.env.NYLAS_CLIENT_SECRET,
-                        code: authorizeNylas.data?.code,
-                    },
-                );
-
-                let calendar = await axios.post(
-                    'https://api.nylas.com/calendars',
-                    {
-                        name: user?.first_name + "'s Calendar",
-                        description: '',
-                        location: '',
-                        timezone: 'UTC',
-                        metadata: {},
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${connectNylas?.data?.access_token}`,
-                        },
-                    },
-                );
-                data.nylasAccountId = connectNylas.data.account_id
-                data.nylasAccessToken = connectNylas.data.access_token
-                data.nylasCalendarId = calendar.data.id
-            }
         }
 
 
@@ -141,53 +86,7 @@ export class UsersService {
         //if status id approved then we will create coach account on nylas
         if (data.coach_status === APPROVED) {
             const user = await this.usersRepository.findUserByUserId(data.user_id);
-            if (user?.nylasAccountId === 'false') {
-                // Creating Nylas Calendar
-                let authorizeNylas = await axios.post(
-                    'https://api.nylas.com/connect/authorize',
-                    {
-                        client_id: process.env.NYLAS_CLIENT_ID,
-                        provider: 'nylas',
-                        scopes: 'calendar',
-                        email: user?.email,
-                        name: user?.first_name + ' ' + user?.last_name,
-                        settings: {},
-                    },
-                );
 
-                let connectNylas = await axios.post(
-                    'https://api.nylas.com/connect/token',
-                    {
-                        client_id: process.env.NYLAS_CLIENT_ID,
-                        client_secret: process.env.NYLAS_CLIENT_SECRET,
-                        code: authorizeNylas.data?.code,
-                    },
-                );
-
-                let calendar = await axios.post(
-                    'https://api.nylas.com/calendars',
-                    {
-                        name: user?.first_name + "'s Calendar",
-                        description: '',
-                        location: '',
-                        timezone: 'UTC',
-                        metadata: {},
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${connectNylas?.data?.access_token}`,
-                        },
-                    },
-                );
-                //update nylas data in users
-                const nylasData = {
-                    nylasAccountId: connectNylas.data.account_id,
-                    nylasAccessToken: connectNylas.data.access_token,
-                    nylasCalendarId: calendar.data.id,
-                    is_coach_approved: true
-                }
-                await this.usersRepository.updateUser({ user_id: data.user_id }, nylasData);
-            }
         }
         //if status is rejected then we will delete assessment of this user
         if (data.coach_status === REJECTED) {
