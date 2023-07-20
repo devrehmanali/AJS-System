@@ -75,10 +75,7 @@ export class UsersService {
             user_id: userData?.user_id,
             device_id: data.device_id
         }
-        return this.usersRepository.findOneAndUpdate(data, storingData, {
-            new: true,
-            upsert: true // Make this update into an upsert
-        });
+        return 0
     }
 
     async updateCoachStatusByEmail(data: any): Promise<any> {
@@ -91,10 +88,6 @@ export class UsersService {
         //if status is rejected then we will delete assessment of this user
         if (data.coach_status === REJECTED) {
             const user = await this.usersRepository.findUserByUserId(data.user_id);
-            const coachRejection = await this.usersRepository.createRejectionReasoning({
-                user_id: data.user_id,
-                reasoning_id: data.reason_id
-            });
         }
         return result
     }

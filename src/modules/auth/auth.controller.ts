@@ -190,38 +190,18 @@ export class AuthController {
     description: SERVER_ERROR,
   })
   @ApiBody({ type: SignUpUserDto })
-  @ApiQuery({
-    name: "user_id",
-    type: String,
-    description: "user_id parameter. Optional",
-    required: false
-  })
-  @ApiQuery({
-    name: "type",
-    type: String,
-    description: "referral type parameter. Optional",
-    required: false
-  })
   @Post('signup')
   async signup(
     @Req() req: RequestWithUserInterface,
     @Res({ passthrough: true },) res: Response,
-    @Query('user_id') userId?: string,
-    @Query('type') type?: string
   ): Promise<object> {
-    const tokens = await this.authService.signup(req.body);
-    if (tokens == null) {
-      return {
-        status: 400,
-        message: 'Email Already Exist',
-      };
+    const response = await this.authService.signup(req.body);
+    if (response.code !== 200) {
+      return response
     } else {
-      general_token(tokens.refresh_token, res);
+      general_token(response.refresh_token, res);
       return {
-        status: 200,
-        message: 'Registration Successful',
-        access_token: tokens.access_token,
-        roles: tokens.user.role,
+        ...response, access_token: response.access_token
       };
     }
   }

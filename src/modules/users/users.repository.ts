@@ -4,11 +4,6 @@ import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User, UserDocument } from './schemas/users.schema';
 import { v4 as uuidv4 } from 'uuid';
-import {
-    CoachRejectionReasoning,
-    CoachRejectionReasoningDocument
-} from '@users/schemas/coach-rejection-reasoning.schema';
-import { UserDeviceIds, UserDeviceIdsDocument } from '@users/schemas/user-device-ids.schema';
 
 @Injectable()
 export class UsersRepository {

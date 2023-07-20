@@ -106,7 +106,7 @@ export class AuthService {
       );
 
       if (email) {
-        return null;
+        return Promise.resolve({ code: 400, message: 'Email already exists' })
       }
 
       const user = await this.usersService.createUser({
@@ -122,14 +122,16 @@ export class AuthService {
 
       await this.usersService.updateByEmail(user.email, { isLoggedIn: true });
 
-      return {
+      return Promise.resolve({
+        code: 200,
+        message: 'Registration successfull',
         user: user,
         access_token: this.jwtService.sign(payload),
         roles: user.role,
         refresh_token: refreshToken,
-      };
+      });
     } catch (err) {
-      console.log(err);
+      return Promise.resolve({ code: 400, message: 'Internel server error' })
     }
   }
 

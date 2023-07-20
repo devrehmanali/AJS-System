@@ -36,6 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       age: user.age,
       user_id: user.user_id,
       role: user.role,
+      activeRole: user.activeRole,
     };
   }
 }

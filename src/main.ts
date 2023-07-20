@@ -23,7 +23,7 @@ async function bootstrap() {
   app.useGlobalFilters(new mongooseFilter());
   app.use(cookieParser());
   app.use(json({limit: '50mb'}))
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 8080;
 
   app.enableVersioning({
     defaultVersion: ['1'],
@@ -31,7 +31,7 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Backend Project NestJS')
+    .setTitle('Backend AJS NestJS')
     .setDescription('API description v1')
     .setVersion('1.0')
     .addTag('NestJS')

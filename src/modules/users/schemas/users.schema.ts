@@ -3,8 +3,6 @@ import { Document } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { ObjectId } from 'mongodb';
 import { Role } from '@enums/role.enum';
-import { DRAFT } from '@/constants/coachStatusConstants';
-const moment = require('moment');
 
 export type UserDocument = User & Document;
 
@@ -72,25 +70,22 @@ export class User {
   @Prop({
     index: true,
     type: String,
-    default: 'https://wellavi.s3.ap-northeast-1.amazonaws.com/male-avatar.jpeg'
+    default: ''
   })
   avatar?: string;
 
   @Prop({
     index: true,
     type: String,
-    default: 'https://wellavi.s3.ap-northeast-1.amazonaws.com/male-avatar.jpeg'
+    default: ''
   })
   cover_image?: string;
 
-  @Prop({
-    index: true,
-    type: String,
-  })
-  stripe_customer_id?: string;
-
   @Prop({ type: [String], enum: Role, default: [Role.COACH] })
   role: Role[];
+
+  @Prop({ type: String, default: Role.COACH })
+  activeRole: Role[];
 
   @Prop({
     type: Boolean,
@@ -104,7 +99,7 @@ export class User {
     default: true,
     index: true,
   })
-  enabled?: boolean;
+  is_active?: boolean;
 
 }
 
